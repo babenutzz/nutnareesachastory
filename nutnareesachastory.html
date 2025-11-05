@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nut and Sacha Wedding</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: '#D4AF37',
+            coal: '#111315'
+          },
+          fontFamily: {
+            tangerine: ['Tangerine', 'cursive'],
+            serifDisplay: ['DM Serif Display', 'serif'],
+            inter: ['Inter', 'ui-sans-serif', 'system-ui']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tangerine:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    html { scroll-behavior: smooth; }
+    .font-tangerine { font-family: 'Tangerine', cursive; }
+    .font-courier { font-family: 'Courier New', monospace; }
+    :root { --eio: cubic-bezier(.22,.61,.36,1); }
+
+    /* Optional: hide scrollbars utility (keeps scrolling functional) */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* ===== Preloader ===== */
+    #preloader {
+      position: fixed; inset: 0;
+      background: white;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10000;
+      transition: opacity .6s ease, visibility .6s ease;
+    }
+    #preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .loader {
+      border: 5px solid #eee;
+      border-top: 5px solid #D4AF37;
+      border-radius: 50%;
+      width: 60px; height: 60px;
+      animation: spin 1.2s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== Reveal Animation (used everywhere) ===== */
+    .reveal, .timeline-item {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: transform .9s var(--eio), opacity .9s var(--eio);
+      will-change: transform, opacity;
+    }
+    .reveal.visible, .timeline-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== Timeline & Circles ===== */
+    .timeline-dot {
+      box-shadow: 0 6px 18px rgba(0,0,0,.15), inset 0 0 0 1px rgba(255,255,255,.5);
+    }
+
+/* ===== Countdown ===== */
+#countdown {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  max-width: 360px;
+  margin: 1rem auto 0;
+}
+
+.timebox {
+  position: relative;
+  aspect-ratio: 1 / 1; /* Always square */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  color: #fff;
+  overflow: hidden; /* Prevent number overflow */
+}
+
+.timebox .value {
+  font-family: 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: clamp(18px, 4vw, 28px);
+  line-height: 1;
+  transition: transform 0.25s var(--eio);
+  white-space: nowrap;
+}
+
+.timebox .label {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  opacity: 0.9;
+  margin-top: 0.25rem;
+}
+
+.value.tick {
+  transform: translateY(-6%);
+}
+
+@media (max-width: 768px) {
+  #countdown {
+    max-width: 320px;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  #countdown {
+    max-width: 280px;
+    gap: 6px;
+  }
+  .timebox {
+    border-radius: 10px;
+  }
+  .timebox .value {
+    font-size: clamp(14px, 5vw, 20px);
+  }
+  .timebox .label {
+    font-size: 0.6rem;
+  }
+}
+
+
+/* ===== Timeline mobile leading line ===== */
+@media (max-width: 768px) {
+  #timeline {
+    padding-left: 1.5rem; /* more space on the left side */
+  }
+
+  #timeline .space-y-12 {
+    position: relative;
+    margin-left: 1.2rem;
+  }
+
+  #timeline::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 24px; /* adjust spacing of the line */
+    width: 2px;
+    height: 100%;
+    background-color: #d1d5db; /* light gray line */
+  }
+
+  #timeline .timeline-item {
+    position: relative;
+    padding-left: 2.5rem; /* ensure text doesn’t overlap line */
+  }
+
+  #timeline .timeline-dot {
+    position: absolute;
+    left: 20px;
+    transform: translateX(-50%);
+    z-index: 2;
+  }
+}
+
+
+
+    @media (max-width: 768px) {
+      .timeline-line { left: 8px !important; }
+      .timeline-dot { left: 8px !important; transform: translateX(0); }
+      .timeline-item-content { padding-left: 2.5rem; text-align: left !important; }
+    }
+  </style>
+</head>
+
+<body class="bg-white text-gray-900 font-inter">
+
+  <!-- ===== Preloader ===== -->
+  <div id="preloader">
+    <div class="flex flex-col items-center">
+      <div class="loader mb-4"></div>
+      <p class="font-courier text-gray-700">Loading memories...</p>
+    </div>
+  </div>
+
+  <!-- ===== Header ===== -->
+  <header class="sticky top-0 z-50 bg-white/85 backdrop-blur border-b border-gray-200">
+    <nav class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
+      <a href="#home" class="font-tangerine text-2xl">N&S</a>
+      <div class="flex gap-4 text-sm font-courier">
+        <a href="#home" class="hover:opacity-70">Home</a>
+        <a href="#couple" class="hover:opacity-70">Couple</a>
+        <a href="#gallery" class="hover:opacity-70">Gallery</a>
+         <a href="#timeline" class="hover:opacity-70">Schedule</a>
+        <a href="#map" class="hover:opacity-70">Map</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section id="home" class="relative h-[92vh] w-full">
+    <video id="heroVideo" autoplay muted loop playsinline class="absolute inset-0 h-full w-full object-cover"></video>
+    <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-black/40"></div>
+
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-white px-3 z-10">
+      <h1 class="font-tangerine text-3xl drop-shadow">Nutnaree & Sacha</h1>
+      <p class="font-courier text-lg mt-2">29 December 2025</p>
+      <p class="font-courier text-lg">Ray Venue, Bangkok</p>
+      <!-- Countdown -->
+<div id="countdown">
+  <div class="timebox"><div id="days" class="value">00</div><div class="label">Days</div></div>
+  <div class="timebox"><div id="hours" class="value">00</div><div class="label">Hours</div></div>
+  <div class="timebox"><div id="minutes" class="value">00</div><div class="label">Minutes</div></div>
+  <div class="timebox"><div id="seconds" class="value">00</div><div class="label">Seconds</div></div>
+</div>
+
+    </div>
+  </section>
+
+  <!-- ===== MONOGRAM ===== -->
+  <section class="px-4 text-center py-10 reveal">
+    <img id="logoImg" alt="Logo" class="mx-auto w-[28vh]" />
+    <p class="font-courier text-2xl mt-4">Let's celebrate together on</p>
+    <p class="font-courier text-2xl font-semibold">29 December 2025</p>
+  </section>
+
+  <!-- ===== COUPLE ===== -->
+  <section id="couple" class="px-4 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 py-16">
+    <div class="flex flex-col items-center reveal">
+      <img id="brideImg" alt="Bride" class="w-40 h-40 md:w-56 md:h-56 rounded-full shadow-lg object-cover" />
+      <p class="font-tangerine text-2xl mt-2">Nutnaree Ruksachob Smith</p>
+    </div>
+    <div class="flex flex-col items-center reveal">
+      <img id="groomImg" alt="Groom" class="w-40 h-40 md:w-56 md:h-56 rounded-full shadow-lg object-cover" />
+      <p class="font-tangerine text-2xl mt-2">Sacha Jay Smith</p>
+    </div>
+  </section>
+
+  <!-- ===== CAROUSEL (1 image per view, fades, auto-advance) ===== -->
+  <section class="my-6">
+    <div class="relative max-w-6xl mx-auto">
+     <div id="snapCarousel" class="relative w-full h-[60vh] md:h-[80vh] overflow-hidden rounded-xl shadow bg-black/5 touch-pan-y"></div>
+    <div id="carouselDots" class="mt-4 flex justify-center gap-2"></div>
+  </section>
+
+  <!-- ===== TIMELINE ===== -->
+  <section id="timeline" class="max-w-5xl mx-auto px-4 py-14 relative">
+    <h2 class="text-center font-serifDisplay text-3xl mb-10 reveal">Our Schedule</h2>
+    <div class="relative">
+      <div class="timeline-line absolute left-1/2 top-0 -translate-x-1/2 w-[2px] h-full bg-gray-300 md:block hidden"></div>
+
+      <div class="space-y-12">
+        <!-- Event 1 -->
+        <div class="timeline-item relative grid md:grid-cols-2 items-center">
+          <div class="md:text-right pr-8 timeline-item-content">
+            <h3 class="font-semibold">We Do</h3>
+            <p class="text-sm text-gray-600">05:00PM - 05:30PM</p>
+            <p class="text-gray-700">The moment our hearts become one as we say “I do” and begin our forever.</p>
+          </div>
+          <div class="absolute left-1/2 -translate-x-1/2 bg-gold text-white w-8 h-8 rounded-full flex items-center justify-center text-sm timeline-dot">1</div>
+        </div>
+        <!-- Event 2 -->
+        <div class="timeline-item relative grid md:grid-cols-2 items-center">
+          <div class="hidden md:block"></div>
+          <div class="md:text-left pl-8 timeline-item-content">
+            <h3 class="font-semibold">We Snap</h3>
+            <p class="text-sm text-gray-600">05:30PM - 06:30PM</p>
+            <p class="text-gray-700">Because moments fade, but memories stay. Let's create memories together</p>
+          </div>
+          <div class="absolute left-1/2 -translate-x-1/2 bg-gold text-white w-8 h-8 rounded-full flex items-center justify-center text-sm timeline-dot">2</div>
+        </div>
+        <!-- Event 3 -->
+        <div class="timeline-item relative grid md:grid-cols-2 items-center">
+          <div class="md:text-right pr-8 timeline-item-content">
+            <h3 class="font-semibold">We Dine</h3>
+            <p class="text-sm text-gray-600">06:30PM - 08:30PM</p>
+            <p class="text-gray-700">A joyful meal shared with the people we love most as we celebrate our new beginning.</p>
+          </div>
+          <div class="absolute left-1/2 -translate-x-1/2 bg-gold text-white w-8 h-8 rounded-full flex items-center justify-center text-sm timeline-dot">3</div>
+        </div>
+        <!-- Event 4 -->
+        <div class="timeline-item relative grid md:grid-cols-2 items-center">
+          <div class="hidden md:block"></div>
+          <div class="md:text-left pl-8 timeline-item-content">
+            <h3 class="font-semibold">We Share</h3>
+            <p class="text-sm text-gray-600">08:30PM - 09:00PM</p>
+            <p class="text-gray-700">Stories, laughter, and memories that remind us how love connects us all.</p>
+          </div>
+          <div class="absolute left-1/2 -translate-x-1/2 bg-gold text-white w-8 h-8 rounded-full flex items-center justify-center text-sm timeline-dot">4</div>
+        </div>
+        <!-- Event 5 (duplicate title kept to match your latest content) -->
+        <div class="timeline-item relative grid md:grid-cols-2 items-center">
+          <div class="md:text-right pr-8 timeline-item-content">
+            <h3 class="font-semibold">We Dance</h3>
+            <p class="text-sm text-gray-600">09:00PM - 12:00AM</p>
+            <p class="text-gray-700">The night comes alive with music, joy, and celebration of our happily ever after.</p>
+          </div>
+          <div class="absolute left-1/2 -translate-x-1/2 bg-gold text-white w-8 h-8 rounded-full flex items-center justify-center text-sm timeline-dot">5</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== GALLERY ===== -->
+  <section id="gallery" class="py-10 bg-[#fafafa]">
+    <h4 class="text-center mb-6 font-courier reveal font-semibold">More Memories</h4>
+    <div id="galleryGrid" class="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+      <!-- images injected -->
+    </div>
+  </section>
+
+  <!-- ===== COLOR THEME ===== -->
+  <section id="attire" class="px-4 py-14 text-center">
+    <h4 class="font-courier mb-2 reveal font-semibold">Wear Your Best Attire</h4>
+    <p class="font-courier text-sm text-gray-600 mb-6 reveal font-semibold">Our color theme</p>
+    <div class="flex justify-center gap-8 reveal">
+      <div class="w-24 h-24 rounded-full shadow-lg ring-1 ring-black/5" style="background-color:#F5F5DC;"></div>
+      <div class="w-24 h-24 rounded-full shadow-lg ring-1 ring-black/5" style="background-color:#658C58;"></div>
+    </div>
+  </section>
+
+  <!-- ===== MAP ===== -->
+  <section id="map" class="px-4 py-14">
+    <h4 class="text-center mb-4 font-courier reveal font-semibold">Wedding Location</h4>
+    <div class="max-w-5xl mx-auto reveal">
+      <div class="relative rounded-xl overflow-hidden bg-white shadow-xl ring-1 ring-black/5">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3874.137013813808!2d100.48806051008872!3d13.830810086513342!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e29b002f6cd8cd%3A0x81ba3ec3330f974f!2sRay%20Venue!5e0!3m2!1sen!2sth!4v1761728641921!5m2!1sen!2sth"
+          class="block w-full [aspect-ratio:16/9]" style="border:0;" allowfullscreen loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== JS: Firebase + Carousel/Gallery + Scroll + Preloader ===== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+
+    /* ---------- Firebase ---------- */
+    const app = initializeApp({
+      apiKey: "AIzaSyDxlQWFYRcbGZ133HPEMXYy8tR_KMUiJw0",
+      authDomain: "lottogame-16083.firebaseapp.com",
+      projectId: "lottogame-16083",
+      storageBucket: "lottogame-16083.firebasestorage.app"
+    });
+    const storage = getStorage(app);
+
+    const files = {
+      video: "BeachVDO3.mp4",
+      heroImages: ["BeachPhoto24.jpg", "BeachPhoto2.jpg", "BeachPhoto8.jpg", "BeachPhoto15.jpg","BeachPhoto28.jpg"],
+      gallery: ["Studio18.jpg", "Studio30.jpg", "Studio32.jpg", "Studio19.jpg", "Studio11.jpg", "Studio35.jpg"],
+      bride: "bride.png",
+      groom: "groom.png",
+      logo: "Logo.png"
+    };
+
+    /* ---------- Scroll Animations (re-trigger both directions) ---------- */
+    let revealObserver;
+    function setupScrollAnimations() {
+      revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+          else entry.target.classList.remove('visible'); // reset when out of view
+        });
+      }, { threshold: 0.15, rootMargin: "0px 0px -10% 0px" });
+
+      document.querySelectorAll('.reveal, .timeline-item').forEach(el => revealObserver.observe(el));
+    }
+    function registerReveal(el) {
+      if (!el) return;
+      el.classList.add('reveal');
+      revealObserver && revealObserver.observe(el);
+    }
+
+    /* ---------- Helpers ---------- */
+    async function setSrc(el, file) {
+      try {
+        const url = await getDownloadURL(ref(storage, file));
+        el.src = url;
+      } catch (e) { console.error("Load fail", file, e); }
+    }
+
+    async function buildCarousel() {
+  const container = document.getElementById("snapCarousel");
+  const dotsWrap  = document.getElementById("carouselDots");
+  container.innerHTML = "";
+  dotsWrap.innerHTML  = "";
+
+  const slides = [];
+  for (const name of files.heroImages) {
+    const url = await getDownloadURL(ref(storage, name));
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = name;
+    img.loading = "lazy";
+    img.decoding = "async";
+    // Centered card that we'll position with transforms for overlap
+    img.className =
+      "reveal absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 " +
+      "w-[72%] md:w-[56%] h-[72%] md:h-[82%] object-cover rounded-xl shadow " +
+      "transition-transform duration-500 ease-out will-change-transform";
+    container.appendChild(img);
+    slides.push(img);
+    registerReveal(img);
+
+    // dot
+    const dot = document.createElement("span");
+    dot.className = "h-2 w-2 rounded-full bg-gray-300";
+    dotsWrap.appendChild(dot);
+  }
+  if (!slides.length) return;
+
+  let current = 0;
+  const GAP = 140; // px between overlapped cards
+
+const circularOffset = (idx) => {
+  let off = idx - current;
+  const N = slides.length;
+  if (off >  N / 2) off -= N;   // wrap right side to the left
+  if (off < -N / 2) off += N;   // wrap left side to the right
+  return off;
+};
+
+
+
+  function render() {
+slides.forEach((el, i) => {
+  const offset = circularOffset(i);
+  const scale = Math.max(0.8, 1 - Math.abs(offset) * 0.08);
+  const z = 100 - Math.abs(offset);
+  el.style.zIndex = String(z);
+  el.style.opacity = Math.abs(offset) > 3 ? "0" : "1";
+  el.style.transform =
+    `translate(-50%, -50%) translateX(${offset * GAP}px) scale(${scale})`;
+});
+
+
+    // dots
+    dotsWrap.querySelectorAll("span").forEach((d, i) => {
+      d.className = `h-2 w-2 rounded-full ${i === current ? 'bg-blue-500' : 'bg-gray-300'}`;
+    });
+  }
+  function go(n) {
+    current = (n + slides.length) % slides.length;
+    render();
+  }
+
+  // Swipe (pointer) controls
+  let startX = null, dragging = false;
+  container.addEventListener("pointerdown", (e) => {
+    startX = e.clientX;
+    dragging = true;
+    container.setPointerCapture(e.pointerId);
+    stopAuto();
+  });
+  container.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    slides.forEach((el, i) => {
+     const off = circularOffset(i);
+const scale = Math.max(0.8, 1 - Math.abs(off - dx / GAP) * 0.08);
+el.style.transform =
+  `translate(-50%, -50%) translateX(${off * GAP + dx}px) scale(${scale})`;
+
+    });
+  });
+  function endDrag(e) {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    dragging = false;
+    if (dx < -60) go(current + 1);
+    else if (dx > 60) go(current - 1);
+    else render();
+    startAuto();
+  }
+  container.addEventListener("pointerup", endDrag);
+  container.addEventListener("pointercancel", endDrag);
+
+  // Auto-advance (still works; remove if you don't want it)
+  let timer = null;
+  const startAuto = () => { stopAuto(); timer = setInterval(() => go(current + 1), 5000); };
+  const stopAuto  = () => { if (timer) { clearInterval(timer); timer = null; } };
+  startAuto();
+
+  render();
+}
+
+
+    /* ---------- Gallery ---------- */
+    async function buildGallery() {
+      const grid = document.getElementById("galleryGrid");
+      grid.innerHTML = "";
+      for (const name of files.gallery) {
+        const url = await getDownloadURL(ref(storage, name));
+        const card = document.createElement("div");
+        card.className = "reveal flex items-center justify-center bg-white rounded-lg overflow-hidden shadow-md aspect-[3/4]";
+        const img = document.createElement("img");
+        img.src = url; img.alt = name;
+        img.loading = "lazy"; img.decoding = "async";
+        img.className = "max-h-full max-w-full object-contain";
+        card.appendChild(img);
+        grid.appendChild(card);
+        registerReveal(card);
+      }
+    }
+
+    /* ---------- Load media & hide preloader ---------- */
+    async function loadMedia() {
+      await Promise.all([
+        setSrc(document.getElementById("heroVideo"), files.video),
+        setSrc(document.getElementById("brideImg"), files.bride),
+        setSrc(document.getElementById("groomImg"), files.groom),
+        setSrc(document.getElementById("logoImg"), files.logo),
+        buildCarousel(),
+        buildGallery()
+      ]);
+      // Hide preloader once initial media is ready
+      document.getElementById("preloader").classList.add("hidden");
+    }
+
+    /* ---------- Boot ---------- */
+    window.addEventListener("load", () => {
+      setupScrollAnimations();
+      loadMedia();
+    });
+
+    /* ===== Countdown (ends 29 Dec 2025, 05:00 PM Bangkok, UTC+07) ===== */
+const weddingDate = new Date("2025-12-29T17:00:00+07:00").getTime();
+
+function setVal(id, newVal) {
+  const el = document.getElementById(id); if (!el) return;
+  const next = String(newVal).padStart(2, '0');
+  if (el.textContent === next) return;
+  el.textContent = next;
+  el.classList.add('tick');
+  setTimeout(() => el.classList.remove('tick'), 240);
+}
+
+function updateCountdown() {
+  const wrap = document.getElementById("countdown");
+  if (!wrap) return;
+
+  const now = Date.now();
+  const distance = weddingDate - now;
+
+  if (distance <= 0) {
+    wrap.innerHTML = "<p class='font-courier text-xl text-white'>It's Wedding Time!</p>";
+    clearInterval(countdownTimer);
+    return;
+  }
+
+  const days    = Math.floor(distance / (1000 * 60 * 60 * 24));
+  const hours   = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+  setVal("days", days);
+  setVal("hours", hours);
+  setVal("minutes", minutes);
+  setVal("seconds", seconds);
+}
+
+updateCountdown();
+const countdownTimer = setInterval(updateCountdown, 1000);
+
+  </script>
+</body>
+</html>
